@@ -1,0 +1,18 @@
+name: Scheduled Task
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Run cleanup script
+        run: |
+          # Place your cleanup script here
+          echo "Running scheduled cleanup task"
