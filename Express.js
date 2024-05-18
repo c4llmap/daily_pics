@@ -4,17 +4,16 @@ const path = require('path');
 const fs = require('fs');
 const { Octokit } = require('@octokit/rest');
 const app = express();
-
 const upload = multer({ dest: 'uploads/' });
 app.use(express.json());
 app.use(express.static('public'));
 
 const octokit = new Octokit({
-    auth: 'YOUR_GITHUB_PERSONAL_ACCESS_TOKEN'
+    auth: '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'
 });
 
-const owner = 'YOUR_GITHUB_USERNAME';
-const repo = 'YOUR_GITHUB_REPOSITORY';
+const owner = 'c4llmap  ';
+const repo = 'https://github.com/c4llmap/daily_pics';
 
 app.post('/upload', upload.single('photo'), async (req, res) => {
     const filePath = path.join(__dirname, 'uploads', req.file.filename);
@@ -25,12 +24,12 @@ app.post('/upload', upload.single('photo'), async (req, res) => {
         await octokit.repos.createOrUpdateFileContents({
             owner,
             repo,
-            path: `photos/${fileName}`,
+            path: `imgs/${fileName}`,
             message: `Add photo ${fileName}`,
             content: fileContent.toString('base64')
         });
 
-        const photoUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main/photos/${fileName}`;
+        const photoUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main/imgs/${fileName}`;
 
         res.json({ success: true, photoUrl, photoId: fileName });
     } catch (error) {
@@ -43,22 +42,17 @@ app.get('/photo/:id', async (req, res) => {
     const photoId = req.params.id;
 
     try {
-        const issueResponse = await octokit.issues.listForRepo({
+        const commentsPath = `log/comments_${photoId}.json`;
+        const commentsData = await octokit.repos.getContent({
             owner,
             repo,
-            labels: photoId
+            path: commentsPath
         });
-
-        const issue = issueResponse.data[0];
-        const commentsResponse = await octokit.issues.listComments({
-            owner,
-            repo,
-            issue_number: issue.number
-        });
+        const comments = JSON.parse(Buffer.from(commentsData.data.content, 'base64').toString());
 
         res.json({
-            comments: commentsResponse.data.map(comment => comment.body),
-            likes: issue.reactions['+1']
+            comments: comments.comments || [],
+            likes: comments.likes || 0
         });
     } catch (error) {
         console.error('Error getting photo data:', error);
@@ -69,20 +63,31 @@ app.get('/photo/:id', async (req, res) => {
 app.post('/photo/:id/comment', async (req, res) => {
     const photoId = req.params.id;
     const { comment } = req.body;
+    const ip = req.ip;
 
     try {
-        const issueResponse = await octokit.issues.listForRepo({
-            owner,
-            repo,
-            labels: photoId
-        });
+        const commentsPath = `log/comments_${photoId}.json`;
+        let comments = { comments: [], likes: 0 };
 
-        const issue = issueResponse.data[0];
-        await octokit.issues.createComment({
+        try {
+            const commentsData = await octokit.repos.getContent({
+                owner,
+                repo,
+                path: commentsPath
+            });
+            comments = JSON.parse(Buffer.from(commentsData.data.content, 'base64').toString());
+        } catch (error) {
+            // File does not exist, create a new one
+        }
+
+        comments.comments.push({ comment, ip });
+
+        await octokit.repos.createOrUpdateFileContents({
             owner,
             repo,
-            issue_number: issue.number,
-            body: comment
+            path: commentsPath,
+            message: `Add comment to ${photoId}`,
+            content: Buffer.from(JSON.stringify(comments)).toString('base64')
         });
 
         res.json({ success: true });
@@ -96,18 +101,28 @@ app.post('/photo/:id/like', async (req, res) => {
     const photoId = req.params.id;
 
     try {
-        const issueResponse = await octokit.issues.listForRepo({
-            owner,
-            repo,
-            labels: photoId
-        });
+        const commentsPath = `log/comments_${photoId}.json`;
+        let comments = { comments: [], likes: 0 };
 
-        const issue = issueResponse.data[0];
-        await octokit.reactions.createForIssue({
+        try {
+            const commentsData = await octokit.repos.getContent({
+                owner,
+                repo,
+                path: commentsPath
+            });
+            comments = JSON.parse(Buffer.from(commentsData.data.content, 'base64').toString());
+        } catch (error) {
+            // File does not exist, create a new one
+        }
+
+        comments.likes += 1;
+
+        await octokit.repos.createOrUpdateFileContents({
             owner,
             repo,
-            issue_number: issue.number,
-            content: '+1'
+            path: commentsPath,
+            message: `Add like to ${photoId}`,
+            content: Buffer.from(JSON.stringify(comments)).toString('base64')
         });
 
         res.json({ success: true });
