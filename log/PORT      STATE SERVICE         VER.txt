@@ -1,0 +1,43 @@
+PORT      STATE SERVICE         VERSION
+135/tcp   open  msrpc           Microsoft Windows RPC
+180/tcp   open  ris?
+190/tcp   open  ssl/gacp?
+|_sslv2-drown: 
+3389/tcp  open  ms-wbt-server   Microsoft Terminal Services
+|_sslv2-drown: 
+4608/tcp  open  ssl/unknown
+|_ssl-ccs-injection: No reply from server (TIMEOUT)
+|_sslv2-drown: 
+7070/tcp  open  ssl/realserver?
+|_sslv2-drown: 
+49664/tcp open  msrpc           Microsoft Windows RPC
+49665/tcp open  msrpc           Microsoft Windows RPC
+49666/tcp open  msrpc           Microsoft Windows RPC
+49667/tcp open  msrpc           Microsoft Windows RPC
+49668/tcp open  msrpc           Microsoft Windows RPC
+49669/tcp open  msrpc           Microsoft Windows RPC
+49670/tcp open  msrpc           Microsoft Windows RPC
+49677/tcp open  msrpc           Microsoft Windows RPC
+Device type: general purpose
+Running: Microsoft Windows XP|7|2012
+OS CPE: cpe:/o:microsoft:windows_xp::sp3 cpe:/o:microsoft:windows_7 cpe:/o:microsoft:windows_server_2012
+OS details: Microsoft Windows XP SP3, Microsoft Windows XP SP3 or Windows 7 or Windows Server 2012
+Network Distance: 2 hops
+TCP Sequence Prediction: Difficulty=256 (Good luck!)
+IP ID Sequence Generation: Incremental
+Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
+
+TRACEROUTE (using port 80/tcp)
+HOP RTT     ADDRESS
+1   0.04 ms 192.168.159.2
+2   0.04 ms hosted-by.stealthrdp.com (193.124.205.80)
+
+NSE: Script Post-scanning.
+Initiating NSE at 02:18
+Completed NSE at 02:18, 0.00s elapsed
+Initiating NSE at 02:18
+Completed NSE at 02:18, 0.00s elapsed
+Read data files from: /usr/bin/../share/nmap
+OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 15938.97 seconds
+           Raw packets sent: 458119 (20.159MB) | Rcvd: 910720 (36.439MB)
